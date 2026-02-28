@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Quest Pro</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="multiplayer.css">
+</head>
+<body>
+    
+    <div id="custom-alert-container"></div>
+    <button id="sound-toggle-btn" onclick="
+        const on = SoundSystem.toggle();
+        this.textContent = on ? '🔊' : '🔇';
+        this.title = on ? 'Sonido activado' : 'Sonido desactivado';
+    " title="Sonido activado">🔊</button>
+    
+    <!-- WIN CELEBRATION OVERLAY -->
+    <div id="win-celebration-overlay" class="win-overlay" style="display:none"></div>
+    
+    <div id="rank-up-overlay" class="rank-up-overlay">
+        <div class="rank-up-box">
+            <i id="rank-up-icon" class="material-icons rank-up-icon">star</i>
+            <h1 id="rank-up-new-rank">¡ASCENSO DE RANGO!</h1>
+            <p>¡Desbloqueaste nuevas recompensas y desafíos!</p>
+        </div>
+    </div>
+
+    <nav class="mobile-nav">
+        <div class="nav-item active" data-target="perfil">
+            <i class="material-icons">person</i>
+            <span>Perfil</span>
+        </div>
+        <div class="nav-item" data-target="estudio">
+            <i class="material-icons">book</i>
+            <span>Estudio</span>
+        </div>
+        <div class="nav-item" data-target="ejercicios">
+            <i class="material-icons">fitness_center</i>
+            <span>Ejercicios</span>
+        </div>
+        <div class="nav-item" data-target="ranking">
+            <i class="material-icons">leaderboard</i>
+            <span>Ranking</span>
+        </div>
+        <div class="nav-item" data-target="pase-hv">
+            <i class="material-icons">workspace_premium</i>
+            <span>Pase HV</span>
+        </div>
+        <div class="nav-item" data-target="tienda">
+            <i class="material-icons">store</i>
+            <span>Tienda</span>
+        </div>
+        <div class="nav-item" data-target="casino">
+            <i class="material-icons">casino</i>
+            <span>Casino</span>
+        </div>
+    </nav>
+
+    <div class="app-container">
+        <main class="main-content">
+            
+            <section id="perfil" class="app-section">
+                <h2>Perfil y Progreso 📊</h2>
+
+                <div class="profile-header">
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <div style="display: flex; align-items: center;">
+                            <i class="material-icons profile-icon">account_circle</i>
+                            <div style="margin-left: 15px;">
+                                <div style="display: flex; align-items: center;">
+                                    <span id="equipped-banner" class="equipped-banner"></span> 
+                                    <h3 id="mostrar-nombre" style="margin-bottom: 5px; margin-left: 5px;">Estudiante Desafío</h3>
+                                </div>
+                                <p id="current-rank" style="font-size: 1.1em; font-weight: bold;"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="resource-panel">
+                        <h3>Tus Recursos</h3>
+                        <div class="resource-grid">
+                            <div class="resource-box">🥇 Lingotes: <span id="total-lingotes">0</span></div>
+                            <div class="resource-box">💎 Gemas: <span id="total-gemas">0</span></div>
+                            <div class="resource-box">🎰 Fichas: <span id="total-fichas">10</span></div>
+                            <div class="resource-box">🎟️ Tickets HV: <span id="total-hv-tickets">0</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="progress-panel">
+                    <h3>Progreso de Nivel</h3>
+                    <h4>Nivel <span id="current-level">1</span>: <span id="level-progress-text">0 / 120 XP (Prox. Nivel)</span></h4>
+                    <div class="progress-container">
+                        <div id="level-progress-bar" class="progress-bar" style="width: 0%;"></div>
+                    </div>
+                </div>
+
+                <div class="progress-panel">
+                    <h3>Progreso de Rango (Temporada Actual)</h3>
+                    <h4>Puntos de Rango: <span id="rank-progress-text">0 / 1000 Puntos (Prox. Rango)</span></h4>
+                    <div class="progress-container">
+                        <div id="rank-progress-bar" class="progress-bar" style="width: 0%; background-color: var(--accent-color);"></div>
+                    </div>
+                </div>
+                
+                <div class="stats-panel">
+                    <h3>Historial de Estudio 🕒</h3>
+                    <div class="stat-grid">
+                        <div class="stat-box">Total (Min): <span id="total-horas-min">0</span></div>
+                        <div class="stat-box">Últimos 7 Días: <span id="horas-7dias">0h 0m</span></div>
+                        <div class="stat-box">Rango Máximo (Previo): <span id="max-rank">Novato</span></div>
+                        <div class="stat-box">Total General: <span id="total-horas-general">0h 0m</span></div>
+                    </div>
+                    
+                    <h4 style="margin-top: 20px;">Registro Diario (Últimos 7 días)</h4>
+                    <div id="daily-history-list" class="daily-history-list">
+                        <p style="color:var(--secondary-text);">No hay datos de estudio.</p>
+                    </div>
+                </div>
+
+                <div class="stats-panel">
+                    <h3>Estadísticas Clave</h3>
+                    <div class="stat-grid">
+                        <div class="stat-box">Total XP: <span id="total-xp">0</span></div>
+                        <div class="stat-box">Boosts Activos: <span id="active-boosts">Ninguno</span></div>
+                        <div class="stat-box">Victorias Buscaminas: <span id="total-minesweeper-wins">0</span></div>
+                        <div class="stat-box">Jackpots Slots: <span id="total-slots-wins">0</span></div>
+                        <div class="stat-box">Victorias Botellas: <span id="total-shell-wins">0</span></div>
+                    </div>
+                </div>
+                
+                <div class="stats-panel">
+                    <h3>Estandartes Coleccionables (Banner) 🚩</h3>
+                    <div id="banner-inventory-list" class="banner-inventory-list">
+                        <p style="color:var(--secondary-text);">No has desbloqueado ningún estandarte.</p>
+                    </div>
+                </div>
+                
+                <div class="stats-panel">
+                    <h3>Ajustes de Perfil</h3>
+                    <div class="input-group">
+                        <label for="nombre-usuario">Cambiar Nombre:</label>
+                        <input type="text" id="nombre-usuario" placeholder="Nuevo Nombre">
+                    </div>
+                    <button id="guardar-nombre-btn" style="margin-top: 10px;">Guardar Nombre</button>
+                </div>
+            </section>
+
+            <section id="estudio" class="app-section hidden">
+                <h2>Registrar Estudio 🧠</h2>
+                
+                <div class="study-form">
+                    <h3>Sesión de Estudio</h3>
+                    
+                    <div class="input-group" style="margin-bottom: 15px;">
+                        <label for="materia-estudio">Materia o Tema:</label>
+                        <input type="text" id="materia-estudio" placeholder="Matemáticas, Historia, Programación..." value="General">
+                    </div>
+                    
+                    <label style="margin-bottom: 5px;">Duración de la Sesión (Base XP: 30 / 15 min):</label>
+                    <div id="duration-selector" class="duration-selector">
+                        <button class="duration-btn" data-minutes="15">15 Min (30 XP)</button>
+                        <button class="duration-btn" data-minutes="30">30 Min (60 XP)</button>
+                        <button class="duration-btn" data-minutes="60">60 Min (120 XP)</button>
+                    </div>
+
+                    <p id="xp-preview" style="margin-top: 15px; font-weight: bold; color: var(--accent-color);">
+                        Selecciona una duración.
+                    </p>
+                    
+                    <button id="registrar-btn" style="margin-top: 20px;" disabled>
+                        Completar Sesión
+                    </button>
+                </div>
+
+                <hr>
+
+                <h2>Misiones Diarias 🎯</h2>
+                <ul id="missions-list" class="mission-list">
+                    <li><p>Cargando misiones...</p></li>
+                </ul>
+                
+                <hr>
+                
+                <h2>Logros 🏆</h2>
+                <div id="achievements-list">
+                    </div>
+            </section>
+
+            <!-- NUEVA SECCIÓN: EJERCICIOS -->
+            <section id="ejercicios" class="app-section hidden">
+                <h2>Registro de Ejercicios 💪</h2>
+                
+                <div class="exercise-history-panel">
+                    <div class="exhist-header">
+                        <h3>📋 Historial de Ejercicios</h3>
+                        <button id="clear-exercise-history-btn" class="btn-ghost-sm">Limpiar historial</button>
+                    </div>
+                    <div id="exercise-history-list" class="exercise-history-list">
+                        <p class="empty-msg">Aún no has registrado ejercicios.</p>
+                    </div>
+                </div>
+                
+                <div class="exercise-form">
+                    <h3>Registra tu Entrenamiento</h3>
+                    <p style="color: var(--secondary-text); margin-bottom: 20px;">
+                        Cada ejercicio te dará XP, Puntos de Rango y recursos. ¡Mantente activo para desbloquear logros únicos!
+                    </p>
+                    
+                    <div class="exercise-grid">
+                        <div class="exercise-item">
+                            <div class="exercise-header">
+                                <span class="exercise-icon">🦵</span>
+                                <h4>Sentadillas</h4>
+                            </div>
+                            <p>Total: <span id="sentadillas-total">0</span></p>
+                            <div class="exercise-input-group">
+                                <input type="number" id="sentadillas-input" placeholder="Cantidad" min="1">
+                                <button class="exercise-btn" data-exercise="sentadillas">Registrar</button>
+                            </div>
+                        </div>
+
+                        <div class="exercise-item">
+                            <div class="exercise-header">
+                                <span class="exercise-icon">💪</span>
+                                <h4>Flexiones</h4>
+                            </div>
+                            <p>Total: <span id="flexiones-total">0</span></p>
+                            <div class="exercise-input-group">
+                                <input type="number" id="flexiones-input" placeholder="Cantidad" min="1">
+                                <button class="exercise-btn" data-exercise="flexiones">Registrar</button>
+                            </div>
+                        </div>
+
+                        <div class="exercise-item">
+                            <div class="exercise-header">
+                                <span class="exercise-icon">🏋️‍♂️</span>
+                                <h4>Pull-ups</h4>
+                            </div>
+                            <p>Total: <span id="pullups-total">0</span></p>
+                            <div class="exercise-input-group">
+                                <input type="number" id="pullups-input" placeholder="Cantidad" min="1">
+                                <button class="exercise-btn" data-exercise="pullups">Registrar</button>
+                            </div>
+                        </div>
+
+                        <div class="exercise-item">
+                            <div class="exercise-header">
+                                <span class="exercise-icon">🔥</span>
+                                <h4>Burpees</h4>
+                            </div>
+                            <p>Total: <span id="burpees-total">0</span></p>
+                            <div class="exercise-input-group">
+                                <input type="number" id="burpees-input" placeholder="Cantidad" min="1">
+                                <button class="exercise-btn" data-exercise="burpees">Registrar</button>
+                            </div>
+                        </div>
+
+                        <div class="exercise-item">
+                            <div class="exercise-header">
+                                <span class="exercise-icon">⚖️</span>
+                                <h4>Plancha (seg)</h4>
+                            </div>
+                            <p>Total: <span id="plancha-total">0</span>s</p>
+                            <div class="exercise-input-group">
+                                <input type="number" id="plancha-input" placeholder="Segundos" min="1">
+                                <button class="exercise-btn" data-exercise="plancha">Registrar</button>
+                            </div>
+                        </div>
+
+                        <div class="exercise-item">
+                            <div class="exercise-header">
+                                <span class="exercise-icon">⚡</span>
+                                <h4>Saltos</h4>
+                            </div>
+                            <p>Total: <span id="saltos-total">0</span></p>
+                            <div class="exercise-input-group">
+                                <input type="number" id="saltos-input" placeholder="Cantidad" min="1">
+                                <button class="exercise-btn" data-exercise="saltos">Registrar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="ranking" class="app-section hidden">
+                <h2>Ranking Global 🏆</h2>
+                
+                <div class="ranking-header">
+                    <div class="your-position">
+                        <h3>Tu Posición Actual</h3>
+                        <div class="position-card">
+                            <div class="position-number">#<span id="user-position">101</span></div>
+                            <div class="position-info">
+                                <h4 id="user-name-ranking">Estudiante Desafío</h4>
+                                <p><span id="user-points-ranking">0</span> Puntos de Rango</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <hr>
+
+                <!-- RANGOS OVERVIEW -->
+                <div class="ranks-overview-panel">
+                    <h3>🎖️ Sistema de Rangos</h3>
+                    <p class="section-subtitle">Todos los rangos y tu progreso actual</p>
+                    <div id="ranks-overview-container" class="ranks-overview-container"></div>
+                </div>
+
+                <hr>
+
+                <!-- SECCIÓN DE AMIGOS MULTIJUGADOR -->
+                <div class="friends-panel">
+                    <div class="friends-panel-header">
+                        <h3>👥 Mis Amigos</h3>
+                        <button class="btn-global-chat" onclick="MP.openGlobalChat()">
+                            🌍 Chat Global
+                            <span id="global-chat-badge" class="notif-badge" style="display:none">●</span>
+                        </button>
+                    </div>
+                    <p class="friends-subtitle">Tu ID: <strong id="my-player-id" class="player-id-display">Cargando...</strong>
+                        <button class="btn-copy-id" onclick="navigator.clipboard.writeText(document.getElementById('my-player-id').textContent); showCustomAlert('¡ID copiado!','success')">📋 Copiar</button>
+                    </p>
+                    
+                    <div class="add-friend-form">
+                        <div class="friend-inputs">
+                            <input type="text" id="friend-id-input" placeholder="ID del amigo (ej: HV-ABC123)" maxlength="12" style="text-transform:uppercase">
+                        </div>
+                        <button id="add-friend-btn" class="add-friend-btn">🔗 Conectar por ID</button>
+                    </div>
+
+                    <div id="friends-list-container" class="friends-list-container">
+                        <p style="color:var(--secondary-text); text-align:center; padding: 15px;">No tienes amigos conectados aún.</p>
+                    </div>
+                </div>
+
+                <hr>
+
+                <!-- SECCIÓN DESAFÍOS -->
+                <div class="challenges-panel">
+                    <h3>⚔️ Desafíos
+                        <span id="challenge-badge" class="notif-badge" style="display:none">●</span>
+                    </h3>
+                    <div id="challenges-container">
+                        <p style="color:var(--secondary-text);text-align:center;padding:15px">No tienes desafíos activos. ¡Reta a un amigo!</p>
+                    </div>
+                </div>
+
+                <hr>
+
+                <div class="ranking-controls">
+                    <h3>Filtrar Ranking</h3>
+                    <div class="filter-buttons">
+                        <button id="filter-all" class="filter-btn active">Todos</button>
+                        <button id="filter-top10" class="filter-btn">Top 10</button>
+                        <button id="filter-around" class="filter-btn">Cerca de Ti</button>
+                        <button id="filter-friends" class="filter-btn">Solo Amigos</button>
+                    </div>
+                </div>
+
+                <div class="ranking-list">
+                    <div id="ranking-container">
+                        <!-- El ranking se generará dinámicamente -->
+                    </div>
+                </div>
+            </section>
+
+            <section id="pase-hv" class="app-section hidden">
+                <h2>Pase de Horas de Vuelo (HV) ✨</h2>
+
+                <div class="progress-panel" style="background-color: #3f3f3f; border-left: 5px solid #FFD700;">
+                    <h3>Pase HV Nivel <span id="pass-level">1</span> <span id="pass-plus-status"></span></h3>
+                    <h4>XP: <span id="pass-progress-text">0 / 500 XP</span></h4>
+                    <div class="progress-container">
+                        <div id="pass-progress-bar" class="progress-bar" style="width: 0%; background-color: #FFD700;"></div>
+                    </div>
+                </div>
+
+                <hr>
+
+                <h3>Recompensas del Pase (Nivel 1 - 30)</h3>
+                <div id="pass-rewards-container" class="pass-rewards-container">
+                    </div>
+            </section>
+
+            <section id="tienda" class="app-section hidden">
+                <h2>Tienda 🛒</h2>
+                <hr>
+
+                <div class="shop-grid">
+                    
+                    <div class="shop-item cost-lingotes">
+                        <h4>Gema por Lingotes 💎</h4>
+                        <p style="margin: 5px 0;">Obtén una valiosa Gema al instante.</p>
+                        <p>Costo: **10 🥇 Lingotes**</p>
+                        <button id="buy-gem-for-lingots">Comprar (10 🥇)</button>
+                    </div>
+
+                    <div class="shop-item cost-lingotes">
+                        <h4>Pack de Fichas 🎰</h4>
+                        <p style="margin: 5px 0;">Pack de 10 Fichas para el Casino.</p>
+                        <p>Costo: **15 🥇 Lingotes**</p>
+                        <button id="buy-chips-pack">Comprar (15 🥇)</button>
+                    </div>
+                    
+                    <div class="shop-item chest-box">
+                        <h4>Cofre Épico 🎁</h4>
+                        <p style="margin: 5px 0;">Contiene recursos raros y fichas.</p>
+                        <p>Costo: **5 💎 Gemas**</p>
+                        <button id="buy-epic-chest">Comprar (5 💎)</button>
+                    </div>
+                    
+                    <div class="shop-item chest-box">
+                        <h4>Cofre Legendario 👑</h4>
+                        <p style="margin: 5px 0;">Contiene grandes cantidades de gemas y lingotes.</p>
+                        <p>Costo: **7 💎 Gemas**</p>
+                        <button id="buy-legendary-chest">Comprar (7 💎)</button>
+                    </div>
+
+                    <div class="shop-item cost-lingotes">
+                        <h4>Boost de XP (x3) 🚀</h4>
+                        <p style="margin: 5px 0;">Triple XP por un tiempo limitado.</p>
+                        <p>Costo: **50 🥇 Lingotes**</p>
+                        <button id="buy-xp-boost">Comprar (50 🥇)</button>
+                    </div>
+
+                    <div class="shop-item cost-lingotes">
+                        <h4>Boost de Puntos (x2) ✨</h4>
+                        <p style="margin: 5px 0;">Doble Puntos de Rango por un tiempo limitado.</p>
+                        <p>Costo: **30 🥇 Lingotes**</p>
+                        <button id="buy-points-boost">Comprar (30 🥇)</button>
+                    </div>
+                </div>
+
+                <hr>
+
+                <h3>Inventario de Cofres</h3>
+                <div class="inventory-panel resource-panel">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <span>Cofres Épicos: <span id="epic-chests-count">0</span></span>
+                        <button id="open-epic-chest" disabled>Abrir Cofre 🎁</button>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span>Cofres Legendarios: <span id="legendary-chests-count">0</span></span>
+                        <button id="open-legendary-chest" disabled>Abrir Cofre 👑</button>
+                    </div>
+                </div>
+
+            </section>
+            
+            <section id="casino" class="app-section hidden">
+                <h2>Casino 🎲</h2>
+                
+                <div class="casino-game">
+                    <h3>Tragaperras (Slots) 🎰</h3>
+                    <div id="slots-jackpot-display" class="jackpot-display">
+                        </div>
+                    <p style="color: var(--secondary-text);">Costo: 2 Fichas por giro.</p>
+                    
+                    <div class="slots-machine">
+                        <div class="reel-container">
+                            <div class="reel" id="reel-1">?</div>
+                            <div class="reel" id="reel-2">?</div>
+                            <div class="reel" id="reel-3">?</div>
+                        </div>
+                    </div>
+                    
+                    <p id="slots-result" style="text-align: center; margin-bottom: 15px; font-weight: bold;">Gira para ganar lingotes, gemas y más.</p>
+                    <button id="spin-btn" style="background-color: var(--accent-color); width: 100%;">Girar (2 🎰)</button>
+                </div>
+
+                <div class="casino-game">
+                    <h3>Juego de las Tres Botellas 🍾</h3>
+                    <div id="shell-jackpot-display" class="jackpot-display">
+                        </div>
+                    <p style="color: var(--secondary-text);">¡Encuentra la botella con el premio! Apuesta fichas para mayores ganancias.</p>
+                    
+                    <div class="bet-selector">
+                        <h4>Selecciona tu Apuesta:</h4>
+                        <div class="bet-buttons">
+                            <button class="bet-btn" data-bet="1">1 🎰</button>
+                            <button class="bet-btn" data-bet="5">5 🎰</button>
+                            <button class="bet-btn" data-bet="10">10 🎰</button>
+                            <button class="bet-btn" data-bet="25">25 🎰</button>
+                        </div>
+                        <p id="bet-preview">Selecciona una apuesta para comenzar.</p>
+                    </div>
+                    
+                    <div class="shell-game-container">
+                        <div class="bottles-container">
+                            <div class="bottle" id="bottle-1" data-bottle="1">
+                                <div class="bottle-icon">🍾</div>
+                            </div>
+                            <div class="bottle" id="bottle-2" data-bottle="2">
+                                <div class="bottle-icon">🍾</div>
+                            </div>
+                            <div class="bottle" id="bottle-3" data-bottle="3">
+                                <div class="bottle-icon">🍾</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <p id="shell-result" style="text-align: center; margin-bottom: 15px; font-weight: bold;">Selecciona tu apuesta y luego elige una botella.</p>
+                    <button id="shell-reset-btn" style="background-color: var(--primary-color); width: 100%;">
+                        Nueva Partida
+                    </button>
+                </div>
+
+                <div class="casino-game">
+                    <h3>Buscaminas 💣</h3>
+                    <div id="minesweeper-jackpot-display" class="jackpot-display">
+                        </div>
+                    <p style="color: var(--secondary-text);">Costo: 5 Fichas por partida. ¡Descubre premios sin explotar!</p>
+
+                    <div id="minesweeper-grid" class="minesweeper-grid-container">
+                        </div>
+                    
+                    <p id="minesweeper-result" style="text-align: center; margin-bottom: 15px; font-weight: bold;">Pulsa "Iniciar" para jugar.</p>
+                    <button id="minesweeper-start-btn" style="background-color: var(--primary-color); width: 100%;">
+                        Iniciar Partida (5 🎰)
+                    </button>
+                </div>
+
+            </section>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+
+    <!-- ═══ MODAL: CHAT ═══ -->
+    <div id="chat-modal" class="mp-modal" style="display:none" onclick="if(event.target===this)MP.closeChat()">
+        <div class="mp-modal-box chat-box">
+            <div class="mp-modal-header">
+                <h3 id="chat-title">💬 Chat</h3>
+                <button class="mp-close-btn" onclick="MP.closeChat()">✕</button>
+            </div>
+            <div id="chat-messages" class="chat-messages"></div>
+            <div class="chat-input-row">
+                <input type="text" id="chat-input" placeholder="Escribe un mensaje..." maxlength="200"
+                    onkeydown="if(event.key==='Enter'){const v=this.value; if(MP._currentChatId==='__global__') MP.sendGlobalMessage(v); else MP.sendChatMessage(v); this.value='';}">
+                <button onclick="const v=document.getElementById('chat-input').value; if(MP._currentChatId==='__global__') MP.sendGlobalMessage(v); else MP.sendChatMessage(v); document.getElementById('chat-input').value=''">➤</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ MODAL: DESAFÍO ═══ -->
+    <div id="challenge-modal" class="mp-modal" style="display:none" onclick="if(event.target===this)MP.closeChallengeModal()">
+        <div class="mp-modal-box">
+            <div class="mp-modal-header">
+                <h3 id="challenge-modal-title">⚔️ Enviar Desafío</h3>
+                <button class="mp-close-btn" onclick="MP.closeChallengeModal()">✕</button>
+            </div>
+            <input type="hidden" id="challenge-friend-id">
+            <div class="challenge-form">
+                <label>Tipo de desafío:</label>
+                <select id="challenge-type" class="challenge-select">
+                    <option value="study">📚 Estudiar más minutos</option>
+                    <option value="points">🏆 Ganar más puntos de rango</option>
+                    <option value="xp">⭐ Ganar más XP</option>
+                </select>
+                <label>Duración:</label>
+                <select id="challenge-hours" class="challenge-select">
+                    <option value="1">1 hora</option>
+                    <option value="6">6 horas</option>
+                    <option value="24" selected>24 horas (1 día)</option>
+                    <option value="72">3 días</option>
+                    <option value="168">1 semana</option>
+                </select>
+                <button class="btn-send-challenge" onclick="MP.submitChallenge()">⚔️ ¡Enviar Desafío!</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ FIREBASE SDK ═══ -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+    <!-- ═══ TU CONFIGURACIÓN FIREBASE ═══ -->
+    <!-- ⚠️ Reemplaza estos valores con los de tu proyecto en Firebase Console -->
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyApQJMz5jO99s7IbOg7ENgDSkU7yfGw8co",
+            authDomain: "desafiohv77.firebaseapp.com",
+            databaseURL: "https://desafiohv77-default-rtdb.firebaseio.com",
+            projectId: "desafiohv77",
+            storageBucket: "desafiohv77.firebasestorage.app",
+            messagingSenderId: "115931175415",
+            appId: "1:115931175415:web:73f7a8821cee4bc913f6f2"
+        };
+        firebase.initializeApp(firebaseConfig);
+    </script>
+
+    <script src="firebase-multiplayer.js"></script>
+    <script>
+        // Iniciar multijugador después de que la app cargue
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => MP.init(), 500);
+        });
+    </script>
+</body>
+</html>
